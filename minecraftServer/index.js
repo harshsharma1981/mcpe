@@ -68,7 +68,7 @@ const port = process.env.PORT || 19132;
         const server = createServer({
             host: '0.0.0.0',
           port: port,// Ensure the port is free
-            version: '1.21.51' // Match your Minecraft version
+            version: '1.21.30' // Match your Minecraft version
         });
 
         server.on('connect', (client) => {
