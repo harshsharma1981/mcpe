@@ -1,25 +1,29 @@
 const { createServer } = require('bedrock-protocol');
 const { Level } = require('level');
 const path = require('path');
-const Chunk = require('prismarine-chunk')('bedrock_1.20.30'); // Make sure this version matches your world
+const Chunk = require('prismarine-chunk')('bedrock_1.20.30'); // Ensure this version matches your world
 
 const worldPath = path.join(__dirname, './test2/db'); // Path to your world directory
 
 async function loadBedrockWorld(worldPath) {
-    const db = new Level(worldPath, { valueEncoding: 'binary' });
-    const chunks = new Map();
+    try {
+        const db = new Level(worldPath, { valueEncoding: 'binary' });
+        const chunks = new Map();
+        let loadedChunksCount = 0;
 
-    let loadedChunksCount = 0;
-
-    for await (const [key, value] of db.iterator()) {
-        if (isChunkKey(key)) {
-            chunks.set(key, value);
-            loadedChunksCount++;
+        for await (const [key, value] of db.iterator()) {
+            if (isChunkKey(key)) {
+                chunks.set(key, value);
+                loadedChunksCount++;
+            }
         }
-    }
 
-    console.log(`Loaded ${loadedChunksCount} chunks from the world.`);
-    return chunks;
+        console.log(`Loaded ${loadedChunksCount} chunks from the world.`);
+        return chunks;
+    } catch (error) {
+        console.error('Failed to load LevelDB database:', error);
+        throw error;
+    }
 }
 
 function isChunkKey(key) {
@@ -27,11 +31,12 @@ function isChunkKey(key) {
 }
 
 function generateChunkKey(x, z) {
-    return `chunk_${x}_${z}`;
+    return `chunk_${x}_${z}`; // Ensure this matches your database's chunk key format
 }
 
 function getChunk(x, z, worldChunks) {
     const chunkKey = generateChunkKey(x, z);
+    console.log(`Looking for chunk with key: ${chunkKey}`);
     const chunkData = worldChunks.get(chunkKey);
 
     if (!chunkData) {
@@ -40,7 +45,6 @@ function getChunk(x, z, worldChunks) {
     }
 
     const chunk = new Chunk();
-
     try {
         chunk.load(chunkData);
     } catch (error) {
@@ -48,7 +52,6 @@ function getChunk(x, z, worldChunks) {
         return null;
     }
 
-    // Check the chunk's palette
     if (!chunk.palette || chunk.palette.length === 0) {
         console.error(`Chunk (${x}, ${z}) has an empty palette.`);
         return null;
@@ -61,12 +64,12 @@ function getChunk(x, z, worldChunks) {
 (async () => {
     try {
         const worldChunks = await loadBedrockWorld(worldPath);
-      const server = createServer({
-    host: '0.0.0.0',
-    port: 19133, // Use a different port
-    version: '1.21.30'
-});
 
+        const server = createServer({
+            host: '0.0.0.0',
+            port: 19133, // Ensure the port is free
+            version: '1.21.30' // Match your Minecraft version
+        });
 
         server.on('connect', (client) => {
             console.log(`New client connected: ${client.username}`);
@@ -82,8 +85,8 @@ function getChunk(x, z, worldChunks) {
                         chunk_x: xChunk,
                         chunk_z: zChunk,
                         data: chunk.dump(),
-                        biomes: [], // You may need to populate this based on your world
-                        block_entities: [] // Populate this if you have block entities
+                        biomes: new Array(256).fill(1), // Example biomes array
+                        block_entities: [] // Add block entities if needed
                     });
                 } else {
                     console.log(`Unable to send chunk (${xChunk}, ${zChunk}) to player ${client.username}.`);
@@ -99,7 +102,13 @@ function getChunk(x, z, worldChunks) {
             console.error('Server error:', err);
         });
 
-        console.log("MCPE Server with Bedrock world is running on port 19132...");
+        console.log("MCPE Server with Bedrock world is running on port 19133...");
+
+        // Clean up on shutdown
+        process.on('SIGINT', async () => {
+            console.log('Shutting down server...');
+            process.exit();
+        });
     } catch (error) {
         console.error('Error starting server:', error);
     }
