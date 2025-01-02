@@ -1,7 +1,7 @@
 const { createServer } = require('bedrock-protocol');
 const { Level } = require('level');
 const path = require('path');
-const Chunk = require('prismarine-chunk')('bedrock_1.20.30'); // Ensure this version matches your world
+const Chunk = require('prismarine-chunk')('bedrock_1.21.30'); // Ensure this version matches your world
 
 const worldPath = path.join(__dirname, './test2/db'); // Path to your world directory
 
