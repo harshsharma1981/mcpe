@@ -61,11 +61,12 @@ function getChunk(x, z, worldChunks) {
 (async () => {
     try {
         const worldChunks = await loadBedrockWorld(worldPath);
-        const server = createServer({
-            host: '192.168.0.6',
-            port: 19132,
-            version: '1.18.2' // Make sure this matches your client version
-        });
+      const server = createServer({
+    host: '0.0.0.0',
+    port: 19133, // Use a different port
+    version: '1.21.30'
+});
+
 
         server.on('connect', (client) => {
             console.log(`New client connected: ${client.username}`);
