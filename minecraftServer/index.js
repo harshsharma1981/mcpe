@@ -1,7 +1,8 @@
 const { createServer } = require('bedrock-protocol');
 const { Level } = require('level');
 const path = require('path');
-const Chunk = require('prismarine-chunk')('bedrock_1.21.30'); // Ensure this version matches your world
+const Chunk = require('prismarine-chunk')('bedrock_1.20.30'); // Fallback to an older version
+
 
 const worldPath = path.join(__dirname, './test2/db'); // Path to your world directory
 
@@ -68,7 +69,7 @@ const port = process.env.PORT || 19132;
         const server = createServer({
             host: '0.0.0.0',
           port: port,// Ensure the port is free
-            version: '1.21.30' // Match your Minecraft version
+            version: '1.20.30' // Match your Minecraft version
         });
 
         server.on('connect', (client) => {
