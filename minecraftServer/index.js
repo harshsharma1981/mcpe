@@ -64,11 +64,11 @@ function getChunk(x, z, worldChunks) {
 (async () => {
     try {
         const worldChunks = await loadBedrockWorld(worldPath);
-
+const port = process.env.PORT || 19132; 
         const server = createServer({
             host: '0.0.0.0',
-            port: 19133, // Ensure the port is free
-            version: '1.21.30' // Match your Minecraft version
+          port: port,// Ensure the port is free
+            version: '1.21.51' // Match your Minecraft version
         });
 
         server.on('connect', (client) => {
